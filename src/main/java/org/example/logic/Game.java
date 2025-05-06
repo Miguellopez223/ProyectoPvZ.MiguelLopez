@@ -80,7 +80,19 @@ public class Game {
                     //System.out.println("projectile: " + p);
                 }
             } else if (plants.get(i) instanceof SunFlower sf) {
-                //System.out.println("SunFlower");
+                if (currentTime - sf.getPrevTime() > sf.getSunTime()) {
+                    sf.setPrevTime(currentTime);
+                    int centerX = sf.getX() + (sf.getWidth() / 2) - 30; // centrado
+                    int startY = sf.getY() - 60; // encima de la planta
+                    int finalY = sf.getY() + sf.getHeight(); // pie de la planta
+
+                    Sun sun = new Sun(centerX, startY, 60, 60);
+                    sun.setStopY(finalY); // indica que debe detenerse en la base del girasol
+                    fallingSuns.add(sun);
+                    iGameEvents.addSunUI(sun);
+
+
+                }
             }
         }
     }

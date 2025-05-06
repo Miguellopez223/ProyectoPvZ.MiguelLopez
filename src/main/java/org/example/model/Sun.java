@@ -14,6 +14,7 @@ public class Sun {
     private int width;
     private int height;
     private long landedTime = -1;
+    private int stopY = 600; // por defecto el suelo
 
     public Sun(int x, int y, int width, int height) {
         this.id = UUID.randomUUID().toString();
@@ -28,7 +29,7 @@ public class Sun {
     }
 
     public boolean hasLanded() {
-        return y >= 600;
+        return y >= stopY;
     }
 
     public boolean shouldDisappear() {

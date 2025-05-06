@@ -16,7 +16,7 @@ import java.util.UUID;
 @Setter
 public class SunFlower extends Plant {
 
-    private int sunTime = 22000; // 22000ms = 22seg
+    private int sunTime = 10000; // 10000ms = 10seg
     private long prevTime;
 
     public SunFlower(int x, int y, int width, int height) {
