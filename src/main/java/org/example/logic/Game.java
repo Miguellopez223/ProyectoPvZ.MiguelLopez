@@ -1,6 +1,7 @@
 package org.example.logic;
 
 import lombok.Getter;
+import org.example.model.Sun;
 import org.example.model.attack.Attack;
 import org.example.model.plant.PeaShooter;
 import org.example.model.attack.GreenPea;
@@ -119,4 +120,39 @@ public class Game {
         gp.setMaxXToDied(800);
         return gp;
     }
+
+    private List<Sun> fallingSuns = new ArrayList<>();
+    public List<Sun> getFallingSuns() {
+        return fallingSuns;
+    }
+
+    public void generateFallingSun() {
+        int x = 100 + (int) (Math.random() * 800);
+        Sun sun = new Sun(x, 0, 60, 60);  // Tamaño más grande
+        fallingSuns.add(sun);
+        iGameEvents.addSunUI(sun);
+    }
+
+
+    public void reviewFallingSuns() {
+        List<Sun> toRemove = new ArrayList<>();
+
+        for (Sun sun : fallingSuns) {
+            if (sun.hasLanded()) {
+                if (sun.getLandedTime() == -1) {
+                    sun.setLandedTime(System.currentTimeMillis());
+                } else if (sun.shouldDisappear()) {
+                    toRemove.add(sun);
+                    iGameEvents.removeSunUI(sun.getId());
+                }
+            } else {
+                sun.fall();
+                iGameEvents.updateSunPosition(sun.getId());
+            }
+        }
+
+        fallingSuns.removeAll(toRemove);
+    }
+
+
 }

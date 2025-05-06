@@ -2,6 +2,7 @@ package org.example.ui;
 
 import org.example.logic.Game;
 import org.example.logic.IGameEvents;
+import org.example.model.Sun;
 import org.example.model.plant.PeaShooter;
 import org.example.model.attack.GreenPea;
 import org.example.model.plant.Plant;
@@ -9,7 +10,10 @@ import org.example.model.plant.SunFlower;
 
 import javax.swing.*;
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.random.RandomGenerator;
+import java.util.List;
+
 
 /**
  * Frame
@@ -20,6 +24,9 @@ import java.util.random.RandomGenerator;
 public class Frame extends JFrame implements IGameEvents {
 
     private Game game;
+
+    private List<SunDrawing> sunDrawings = new ArrayList<>();
+
 
     public Frame() throws HeadlessException {
         setTitle("My first JFrame");
@@ -86,6 +93,31 @@ public class Frame extends JFrame implements IGameEvents {
             }
         }).start();
 
+        // GENERAR SOLES
+        new Thread(() -> {
+            while (true) {
+                game.generateFallingSun();
+                try {
+                    Thread.sleep(10000); // cada 10 segundos exactos
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+
+        //MOVER SOLES
+        new Thread(() -> {
+            while (true) {
+                game.reviewFallingSuns();
+                try {
+                    Thread.sleep(20); // velocidad de caída
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
         // VALIDAR REGLAS JUEGO
         new Thread(() -> {
             while (true) {
@@ -147,6 +179,36 @@ public class Frame extends JFrame implements IGameEvents {
         }
         return null;
     }
+
+    @Override
+    public void addSunUI(Sun sun) {
+        SunDrawing sd = new SunDrawing(sun);
+        sunDrawings.add(sd);
+        getContentPane().add(sd, 0);
+        sd.repaint();
+    }
+
+    @Override
+    public void updateSunPosition(String id) {
+        for (SunDrawing sd : sunDrawings) {
+            if (sd.getSun().getId().equals(id)) {
+                sd.updatePosition();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void removeSunUI(String id) {
+        sunDrawings.removeIf(sd -> {
+            if (sd.getSun().getId().equals(id)) {
+                getContentPane().remove(sd);
+                return true;
+            }
+            return false;
+        });
+    }
+
 
     public static void main(String[] args) {
         Frame frame = new Frame();

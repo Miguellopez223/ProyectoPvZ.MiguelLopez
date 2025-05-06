@@ -1,5 +1,6 @@
 package org.example.logic;
 
+import org.example.model.Sun;
 import org.example.model.attack.GreenPea;
 import org.example.model.plant.Plant;
 
@@ -18,4 +19,8 @@ public interface IGameEvents {
     void updatePositionUI(String id);
 
     void deleteComponentUI(String id);
+    void addSunUI(Sun sun);
+    void updateSunPosition(String id);
+    void removeSunUI(String id);
+
 }
