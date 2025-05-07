@@ -35,7 +35,8 @@ public class Frame extends JFrame implements IGameEvents {
         //getContentPane().setLayout(null);
         setVisible(true);
 
-        Background background = new Background();
+        Background background = new Background(this);
+
         background.setSize(getWidth() - 10, getHeight() - 35);
         repaint();
         getContentPane().add(background);
@@ -235,6 +236,11 @@ public class Frame extends JFrame implements IGameEvents {
             getContentPane().add(zd, 0);
             zd.repaint();
         }
+    }
+
+    @Override
+    public void clicInYard(int x, int y) {
+        game.createSunFlower(x, y); // Lo explicamos en el siguiente paso
     }
 
 

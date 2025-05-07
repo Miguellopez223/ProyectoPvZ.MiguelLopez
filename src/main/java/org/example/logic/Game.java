@@ -188,5 +188,32 @@ public class Game {
         }
     }
 
+    public void createSunFlower(int clicX, int clicY) {
+        int widthCuadrante = 100;
+        int heightCuadrante = 120;
+
+        int fila = (clicY - posStartY) / heightCuadrante;
+        int columna = (clicX - posStartX) / widthCuadrante;
+
+        if (fila < 0 || fila >= 5 || columna < 0 || columna >= 9)
+            return;
+
+        if (plantsInBoard == null)
+            plantsInBoard = new boolean[5][9];
+
+        if (plantsInBoard[fila][columna])
+            return;
+
+        int x = posStartX + (columna * widthCuadrante) + (widthCuadrante / 2) - (PEA_SHOOTER_WIDTH / 2);
+        int y = posStartY + (fila * heightCuadrante) + (heightCuadrante / 2) - (PEA_SHOOTER_HEIGHT / 2);
+
+        SunFlower sf = new SunFlower(x, y, PEA_SHOOTER_WIDTH, PEA_SHOOTER_HEIGHT);
+        plants.add(sf);
+        plantsInBoard[fila][columna] = true;
+
+        iGameEvents.addPlantUI(sf);
+    }
+
+
 
 }
