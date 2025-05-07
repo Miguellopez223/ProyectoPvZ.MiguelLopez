@@ -7,6 +7,8 @@ import org.example.model.plant.PeaShooter;
 import org.example.model.attack.GreenPea;
 import org.example.model.plant.Plant;
 import org.example.model.plant.SunFlower;
+import org.example.model.zombie.NormalZombie;
+import org.example.model.zombie.Zombie;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -34,6 +36,9 @@ public class Game {
     private List<Plant> plants;
     @Getter
     private List<Attack> attacks;
+    @Getter
+    private List<Zombie> zombies = new ArrayList<>();
+
 
     private IGameEvents iGameEvents;
 
@@ -164,6 +169,23 @@ public class Game {
         }
 
         fallingSuns.removeAll(toRemove);
+    }
+
+    public void createDefaultZombie() {
+        int x = posStartX + 900;
+        int y = posStartY + 20 + (int)(Math.random() * 5) * 120; // fila aleatoria
+        NormalZombie zombie = new NormalZombie(x, y, 50, 70);
+        zombies.add(zombie);
+        iGameEvents.addZombieUI(zombie);
+    }
+
+    public void reviewZombies() {
+        for (Zombie zombie : zombies) {
+            if (zombie instanceof NormalZombie nz && nz.canAdvance()) {
+                nz.avanzar();
+                iGameEvents.updatePositionUI(nz.getId());
+            }
+        }
     }
 
 

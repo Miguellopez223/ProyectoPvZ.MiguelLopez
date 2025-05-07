@@ -22,5 +22,8 @@ public interface IGameEvents {
     void addSunUI(Sun sun);
     void updateSunPosition(String id);
     void removeSunUI(String id);
+    void addZombieUI(org.example.model.zombie.Zombie zombie);
+    void clicInYard(int x, int y);
+
 
 }

@@ -118,11 +118,24 @@ public class Frame extends JFrame implements IGameEvents {
             }
         }).start();
 
+        // CREAR ZOMBIS CADA 10 SEGUNDOS
+        new Thread(() -> {
+            while (true) {
+                game.createDefaultZombie();
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
         // VALIDAR REGLAS JUEGO
         new Thread(() -> {
             while (true) {
                 game.reviewPlants();
                 game.reviewAttacks();
+                game.reviewZombies();
                 try {
                     Thread.sleep(1);
                 } catch (InterruptedException e) {
@@ -155,9 +168,15 @@ public class Frame extends JFrame implements IGameEvents {
 
     @Override
     public void updatePositionUI(String id) {
-        Component c = getComponentById(id);
-        if (c != null) {
-            ((GreenPeaDrawing) c).updatePosition();
+        for (Component c : getContentPane().getComponents()) {
+            if (c instanceof GreenPeaDrawing gpd && gpd.getId().equals(id)) {
+                gpd.updatePosition();
+                return;
+            }
+            if (c instanceof NormalZombieDrawing zd && zd.getId().equals(id)) {
+                zd.updatePosition();
+                return;
+            }
         }
     }
 
@@ -208,6 +227,16 @@ public class Frame extends JFrame implements IGameEvents {
             return false;
         });
     }
+
+    @Override
+    public void addZombieUI(org.example.model.zombie.Zombie zombie) {
+        if (zombie instanceof org.example.model.zombie.NormalZombie nz) {
+            NormalZombieDrawing zd = new NormalZombieDrawing(nz);
+            getContentPane().add(zd, 0);
+            zd.repaint();
+        }
+    }
+
 
 
     public static void main(String[] args) {
