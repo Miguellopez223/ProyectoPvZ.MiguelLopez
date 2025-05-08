@@ -17,6 +17,18 @@ public class Background extends JPanel {
     public Rectangle peaShooterSlot = new Rectangle(50, 10, 60, 80);
     public Rectangle sunflowerSlot = new Rectangle(120, 10, 60, 80);
 
+    // Parámetros de la grilla (misma lógica que en Frame)
+    private final int startX = 100;
+    private final int startY = 100;
+    private final int cellWidth = 102;
+    private final int cellHeight = 125;
+    private final int cols = 9;
+    private final int rows = 5;
+
+
+
+
+
     public Background() {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("pvz-jardin-full.png")) {
             bufferedImage = ImageIO.read(inputStream);
@@ -55,5 +67,18 @@ public class Background extends JPanel {
             g2d.drawImage(sunflowerIcon, sunflowerSlot.x, sunflowerSlot.y,
                     sunflowerSlot.width, sunflowerSlot.height, this);
         }
+
+        // Dibuja la grilla roja de plantado
+        g.setColor(Color.RED);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                int x = startX + j * cellWidth;
+                int y = startY + i * cellHeight;
+                g.drawRect(x, y, cellWidth, cellHeight);
+            }
+        }
+
     }
+
+
 }

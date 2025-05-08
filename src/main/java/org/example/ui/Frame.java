@@ -24,6 +24,30 @@ public class Frame extends JFrame implements IGameEvents {
     private JLayeredPane layeredPane;
     private List<SunDrawing> sunDrawings = new ArrayList<>();
 
+    // Tamaño de celdas del jardín
+    private final int startX = 100;
+    private final int startY = 100;
+    private final int cellWidth = 102;
+    private final int cellHeight = 125;
+    private final int cols = 9;
+    private final int rows = 5;
+
+
+
+    // Devuelve el centro de la celda si está dentro del área válida
+    private Point getCellCenterIfValid(int x, int y) {
+        int col = (x - startX) / cellWidth;
+        int row = (y - startY) / cellHeight;
+
+        if (col >= 0 && col < cols && row >= 0 && row < rows) {
+            int centerX = startX + col * cellWidth + cellWidth / 2;
+            int centerY = startY + row * cellHeight + cellHeight / 2;
+            return new Point(centerX, centerY);
+        }
+        return null;
+    }
+
+
     public Frame() {
         setTitle("Plants vs Zombies");
         setSize(1010, 735);
@@ -48,30 +72,46 @@ public class Frame extends JFrame implements IGameEvents {
                 int x = e.getX();
                 int y = e.getY();
 
-                // Seleccionar planta
+                // 1. Primero, revisamos si hiciste clic en un ícono (selector)
                 if (background.peaShooterSlot.contains(x, y)) {
                     selectedPlant = "Peashooter";
+                    System.out.println("Seleccionaste Peashooter");
                     return;
                 } else if (background.sunflowerSlot.contains(x, y)) {
                     selectedPlant = "Sunflower";
+                    System.out.println("Seleccionaste Sunflower");
                     return;
                 }
 
-                // Plantar
+                // 2. Si ya tenías una planta seleccionada, revisamos si hiciste clic en una celda válida
                 if (selectedPlant != null) {
+                    Point cellCenter = getCellCenterIfValid(x, y);
+                    if (cellCenter == null) {
+                        System.out.println("Haz clic en una celda válida.");
+                        return;
+                    }
+
+                    int px = cellCenter.x - Game.PEA_SHOOTER_WIDTH / 2;
+                    int py = cellCenter.y - Game.PEA_SHOOTER_HEIGHT / 2;
+
+                    // Plantar la planta seleccionada
                     if (selectedPlant.equals("Peashooter")) {
-                        PeaShooter ps = new PeaShooter(x, y, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        PeaShooter ps = new PeaShooter(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
                         game.getPlants().add(ps);
                         addPlantUI(ps);
                     } else if (selectedPlant.equals("Sunflower")) {
-                        SunFlower sf = new SunFlower(x, y, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        SunFlower sf = new SunFlower(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
                         game.getPlants().add(sf);
                         addPlantUI(sf);
                     }
-                    selectedPlant = null;
+
+                    selectedPlant = null; // limpiar selección
                 }
             }
         });
+
+
+
 
         pack();
         setVisible(true);
