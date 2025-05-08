@@ -72,7 +72,7 @@ public class Frame extends JFrame implements IGameEvents {
                 int x = e.getX();
                 int y = e.getY();
 
-                // 1. Primero, revisamos si hiciste clic en un ícono (selector)
+                // 1. Primero, se revisa si se hizo clic en un ícono (selector)
                 if (background.peaShooterSlot.contains(x, y)) {
                     selectedPlant = "Peashooter";
                     System.out.println("Seleccionaste Peashooter");
@@ -94,7 +94,15 @@ public class Frame extends JFrame implements IGameEvents {
                     int px = cellCenter.x - Game.PEA_SHOOTER_WIDTH / 2;
                     int py = cellCenter.y - Game.PEA_SHOOTER_HEIGHT / 2;
 
-                    // Plantar la planta seleccionada
+                    // ❌ Verificar si ya hay una planta en esta celda
+                    for (Plant p : game.getPlants()) {
+                        if (Math.abs(p.getX() - px) < cellWidth / 2 && Math.abs(p.getY() - py) < cellHeight / 2) {
+                            System.out.println("Ya hay una planta en esta celda.");
+                            return;
+                        }
+                    }
+
+                    // ✅ Plantar la nueva planta
                     if (selectedPlant.equals("Peashooter")) {
                         PeaShooter ps = new PeaShooter(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
                         game.getPlants().add(ps);
@@ -107,6 +115,7 @@ public class Frame extends JFrame implements IGameEvents {
 
                     selectedPlant = null; // limpiar selección
                 }
+
             }
         });
 

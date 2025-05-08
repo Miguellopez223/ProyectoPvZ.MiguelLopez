@@ -9,6 +9,7 @@ import org.example.model.plant.Plant;
 import org.example.model.plant.SunFlower;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -147,24 +148,25 @@ public class Game {
 
 
     public void reviewFallingSuns() {
-        List<Sun> toRemove = new ArrayList<>();
+        Iterator<Sun> iterator = fallingSuns.iterator();
 
-        for (Sun sun : fallingSuns) {
+        while (iterator.hasNext()) {
+            Sun sun = iterator.next();
+
             if (sun.hasLanded()) {
                 if (sun.getLandedTime() == -1) {
                     sun.setLandedTime(System.currentTimeMillis());
                 } else if (sun.shouldDisappear()) {
-                    toRemove.add(sun);
                     iGameEvents.removeSunUI(sun.getId());
+                    iterator.remove(); // ✅ eliminación segura
                 }
             } else {
                 sun.fall();
                 iGameEvents.updateSunPosition(sun.getId());
             }
         }
-
-        fallingSuns.removeAll(toRemove);
     }
+
 
 
 }
