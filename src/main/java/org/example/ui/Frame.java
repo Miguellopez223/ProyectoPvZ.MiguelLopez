@@ -3,66 +3,124 @@ package org.example.ui;
 import org.example.logic.Game;
 import org.example.logic.IGameEvents;
 import org.example.model.Sun;
-import org.example.model.plant.PeaShooter;
 import org.example.model.attack.GreenPea;
+import org.example.model.plant.PeaShooter;
 import org.example.model.plant.Plant;
 import org.example.model.plant.SunFlower;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-import java.util.random.RandomGenerator;
 import java.util.List;
 
-
-/**
- * Frame
- *
- * @author Marcos Quispe
- * @since 1.0
- */
 public class Frame extends JFrame implements IGameEvents {
 
-    private Game game;
+    public static String selectedPlant = null;
 
+    private Game game;
+    private Background background;
+    private JLayeredPane layeredPane;
     private List<SunDrawing> sunDrawings = new ArrayList<>();
 
-
-    public Frame() throws HeadlessException {
-        setTitle("My first JFrame");
+    public Frame() {
+        setTitle("Plants vs Zombies");
         setSize(1010, 735);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        //getContentPane().setLayout(null);
+        setLocationRelativeTo(null);
+
+        // Usamos layeredPane para manejar el fondo + componentes
+        layeredPane = new JLayeredPane();
+        layeredPane.setLayout(null);
+        layeredPane.setPreferredSize(new Dimension(1010, 735));
+        setContentPane(layeredPane);
+
+        // Fondo
+        background = new Background();
+        background.setBounds(0, 0, 1010, 735);
+        layeredPane.add(background, Integer.valueOf(0)); // fondo en la capa más baja
+
+        // MouseListener para selección y plantado
+        background.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                int x = e.getX();
+                int y = e.getY();
+
+                // Seleccionar planta
+                if (background.peaShooterSlot.contains(x, y)) {
+                    selectedPlant = "Peashooter";
+                    return;
+                } else if (background.sunflowerSlot.contains(x, y)) {
+                    selectedPlant = "Sunflower";
+                    return;
+                }
+
+                // Plantar
+                if (selectedPlant != null) {
+                    if (selectedPlant.equals("Peashooter")) {
+                        PeaShooter ps = new PeaShooter(x, y, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        game.getPlants().add(ps);
+                        addPlantUI(ps);
+                    } else if (selectedPlant.equals("Sunflower")) {
+                        SunFlower sf = new SunFlower(x, y, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        game.getPlants().add(sf);
+                        addPlantUI(sf);
+                    }
+                    selectedPlant = null;
+                }
+            }
+        });
+
+        pack();
         setVisible(true);
 
-        Background background = new Background();
-        background.setSize(getWidth() - 10, getHeight() - 35);
-        repaint();
-        getContentPane().add(background);
-
+        // Iniciar lógica del juego
         game = new Game(this);
+        startGameThreads();
+
+        background.repaint(); // aseguramos dibujado inicial
+    }
+
+    private void startGameThreads() {
         new Thread(() -> {
-            int nroPlanta = 0;
-            while (nroPlanta < 5) {
-                game.createDefaultPeaShooter(nroPlanta);
-                nroPlanta++;
+            while (true) {
+                game.reviewPlants();
+                game.reviewAttacks();
                 try {
-                    Thread.sleep(RandomGenerator.getDefault().nextInt(2000));
+                    Thread.sleep(1);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
             }
-            game.createDefaultSunFlower();
         }).start();
 
-        System.out.println("images creada");
-
-        getContentPane().repaint();
-
-        // REFRESH PLANTS
         new Thread(() -> {
             while (true) {
-                for (Component c : getContentPane().getComponents()) {
+                game.reviewFallingSuns();
+                try {
+                    Thread.sleep(20);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (true) {
+                game.generateFallingSun();
+                try {
+                    Thread.sleep(10000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (true) {
+                for (Component c : layeredPane.getComponents()) {
                     if (c instanceof PeaShooterDrawing || c instanceof SunFlowerDrawing) {
                         c.repaint();
                     }
@@ -75,11 +133,9 @@ public class Frame extends JFrame implements IGameEvents {
             }
         }).start();
 
-        // AVANZAR PROJECTILES
         new Thread(() -> {
-            game.reviewAttacks();
             while (true) {
-                for (Component c : getContentPane().getComponents()) {
+                for (Component c : layeredPane.getComponents()) {
                     if (c instanceof GreenPeaDrawing) {
                         c.repaint();
                     }
@@ -89,48 +145,8 @@ public class Frame extends JFrame implements IGameEvents {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                //repaint();
             }
         }).start();
-
-        // GENERAR SOLES
-        new Thread(() -> {
-            while (true) {
-                game.generateFallingSun();
-                try {
-                    Thread.sleep(10000); // cada 10 segundos exactos
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-
-        //MOVER SOLES
-        new Thread(() -> {
-            while (true) {
-                game.reviewFallingSuns();
-                try {
-                    Thread.sleep(20); // velocidad de caída
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-        // VALIDAR REGLAS JUEGO
-        new Thread(() -> {
-            while (true) {
-                game.reviewPlants();
-                game.reviewAttacks();
-                try {
-                    Thread.sleep(1);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-        System.out.println("frame creado");
     }
 
     @Override
@@ -141,23 +157,26 @@ public class Frame extends JFrame implements IGameEvents {
         } else if (p instanceof SunFlower sf) {
             plantDrawing = new SunFlowerDrawing(sf);
         }
-        getContentPane().add(plantDrawing, 0);
-        plantDrawing.repaint();
-        System.out.println("nueva planta");
+        if (plantDrawing != null) {
+            plantDrawing.setBounds(p.getX(), p.getY(), p.getWidth(), p.getHeight());
+            layeredPane.add(plantDrawing, Integer.valueOf(1)); // capa sobre el fondo
+            plantDrawing.repaint();
+        }
     }
 
     @Override
     public void throwAttackUI(GreenPea p) {
         GreenPeaDrawing pDrawing = new GreenPeaDrawing(p);
-        getContentPane().add(pDrawing, 0);
+        pDrawing.setBounds(p.getX(), p.getY(), p.getWidth(), p.getHeight());
+        layeredPane.add(pDrawing, Integer.valueOf(2)); // por encima de plantas
         pDrawing.repaint();
     }
 
     @Override
     public void updatePositionUI(String id) {
         Component c = getComponentById(id);
-        if (c != null) {
-            ((GreenPeaDrawing) c).updatePosition();
+        if (c instanceof GreenPeaDrawing gp) {
+            gp.updatePosition();
         }
     }
 
@@ -165,16 +184,14 @@ public class Frame extends JFrame implements IGameEvents {
     public void deleteComponentUI(String id) {
         Component c = getComponentById(id);
         if (c != null) {
-            getContentPane().remove(c);
+            layeredPane.remove(c);
         }
     }
 
     public Component getComponentById(String id) {
-        for (int i = 0; i < getContentPane().getComponents().length; i++) {
-            if (getContentPane().getComponents()[i] instanceof GreenPeaDrawing pd) {
-                if (pd.getId().equals(id)) {
-                    return getContentPane().getComponents()[i];
-                }
+        for (Component comp : layeredPane.getComponents()) {
+            if (comp instanceof GreenPeaDrawing pd && pd.getId().equals(id)) {
+                return comp;
             }
         }
         return null;
@@ -183,8 +200,9 @@ public class Frame extends JFrame implements IGameEvents {
     @Override
     public void addSunUI(Sun sun) {
         SunDrawing sd = new SunDrawing(sun);
+        sd.setBounds(sun.getX(), sun.getY(), sun.getWidth(), sun.getHeight());
         sunDrawings.add(sd);
-        getContentPane().add(sd, 0);
+        layeredPane.add(sd, Integer.valueOf(3)); // encima de todo
         sd.repaint();
     }
 
@@ -202,15 +220,14 @@ public class Frame extends JFrame implements IGameEvents {
     public void removeSunUI(String id) {
         sunDrawings.removeIf(sd -> {
             if (sd.getSun().getId().equals(id)) {
-                getContentPane().remove(sd);
+                layeredPane.remove(sd);
                 return true;
             }
             return false;
         });
     }
 
-
     public static void main(String[] args) {
-        Frame frame = new Frame();
+        new Frame();
     }
 }

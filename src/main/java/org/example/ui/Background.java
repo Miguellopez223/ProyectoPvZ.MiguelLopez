@@ -7,42 +7,53 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Fondo
- *
- * @author Marcos Quispe
- * @since 1.0
- */
 public class Background extends JPanel {
 
     private BufferedImage bufferedImage;
+    private Image peaShooterIcon;
+    private Image sunflowerIcon;
+
+    // Zonas clicables de íconos
+    public Rectangle peaShooterSlot = new Rectangle(50, 10, 60, 80);
+    public Rectangle sunflowerSlot = new Rectangle(120, 10, 60, 80);
 
     public Background() {
-        InputStream inputStream = null;
-        try {
-            inputStream = this.getClass().getClassLoader().getResourceAsStream("pvz-jardin-full.png"); // no funciona bien con webp
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("pvz-jardin-full.png")) {
             bufferedImage = ImageIO.read(inputStream);
         } catch (IOException e) {
+            System.err.println("Error cargando fondo.");
             e.printStackTrace();
-        } finally {
-            if (inputStream != null) {
-                try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
+        }
+
+        try {
+            peaShooterIcon = ImageIO.read(getClass().getClassLoader().getResource("PeashooterIcon.png"));
+            sunflowerIcon = ImageIO.read(getClass().getClassLoader().getResource("SunflowerIcon.png"));
+        } catch (IOException e) {
+            System.err.println("Error cargando íconos de plantas.");
+            e.printStackTrace();
         }
     }
 
     @Override
-    public void paint(Graphics g) {
-        //super.paint(g);
+    protected void paintComponent(Graphics g) {
+        super.paintComponent(g); // LIMPIA el panel antes de dibujar
+
         Graphics2D g2d = (Graphics2D) g;
 
-        //g2d.drawImage(bufferedImage, 0, 0, getWidth(), getHeight(), this);
-        g.drawImage(bufferedImage, 0, 0, getWidth(), getHeight()
-                , 165, 0
-                , 990, 570, this);
+        // Fondo del jardín
+        if (bufferedImage != null) {
+            g2d.drawImage(bufferedImage, 0, 0, getWidth(), getHeight(),
+                    165, 0, 990, 570, this);
+        }
+
+        // Selector de plantas
+        if (peaShooterIcon != null) {
+            g2d.drawImage(peaShooterIcon, peaShooterSlot.x, peaShooterSlot.y,
+                    peaShooterSlot.width, peaShooterSlot.height, this);
+        }
+        if (sunflowerIcon != null) {
+            g2d.drawImage(sunflowerIcon, sunflowerSlot.x, sunflowerSlot.y,
+                    sunflowerSlot.width, sunflowerSlot.height, this);
+        }
     }
 }
