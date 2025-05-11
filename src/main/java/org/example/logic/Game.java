@@ -131,7 +131,7 @@ public class Game {
         int x = plant.getX() + plant.getWidth();
         int y = plant.getY() + (PEA_SHOOTER_HEIGHT / 4) - (PEA_WIDTH / 2) + 4;
         GreenPea gp = new GreenPea(x, y, PEA_WIDTH, PEA_HEIGHT);
-        gp.setMaxXToDied(800);
+        gp.setMaxXToDied(1050);
         return gp;
     }
 

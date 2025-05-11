@@ -24,6 +24,12 @@ public class Frame extends JFrame implements IGameEvents {
     private JLayeredPane layeredPane;
     private List<SunDrawing> sunDrawings = new ArrayList<>();
 
+    private JLabel sunCounterLabel;
+    private int sunCounter = 0;
+    private static final int COSTO_SUNFLOWER = 50;
+    private static final int COSTO_PEASHOOTER = 100;
+
+
     // Tamaño de celdas del jardín
     private final int startX = 100;
     private final int startY = 100;
@@ -32,9 +38,6 @@ public class Frame extends JFrame implements IGameEvents {
     private final int cols = 9;
     private final int rows = 5;
 
-
-
-    // Devuelve el centro de la celda si está dentro del área válida
     private Point getCellCenterIfValid(int x, int y) {
         int col = (x - startX) / cellWidth;
         int row = (y - startY) / cellHeight;
@@ -47,32 +50,33 @@ public class Frame extends JFrame implements IGameEvents {
         return null;
     }
 
-
     public Frame() {
         setTitle("Plants vs Zombies");
         setSize(1010, 735);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        // Usamos layeredPane para manejar el fondo + componentes
         layeredPane = new JLayeredPane();
         layeredPane.setLayout(null);
         layeredPane.setPreferredSize(new Dimension(1010, 735));
         setContentPane(layeredPane);
 
-        // Fondo
         background = new Background();
         background.setBounds(0, 0, 1010, 735);
-        layeredPane.add(background, Integer.valueOf(0)); // fondo en la capa más baja
+        layeredPane.add(background, Integer.valueOf(0));
 
-        // MouseListener para selección y plantado
+        sunCounterLabel = new JLabel("0");
+        sunCounterLabel.setFont(new Font("Arial", Font.BOLD, 24));
+        sunCounterLabel.setForeground(Color.BLACK); // ahora en negro
+        sunCounterLabel.setBounds(35, 60, 100, 40);  // más arriba (antes estaba en 90)
+        layeredPane.add(sunCounterLabel, Integer.valueOf(4));
+
         background.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 int x = e.getX();
                 int y = e.getY();
 
-                // 1. Primero, se revisa si se hizo clic en un ícono (selector)
                 if (background.peaShooterSlot.contains(x, y)) {
                     selectedPlant = "Peashooter";
                     System.out.println("Seleccionaste Peashooter");
@@ -83,7 +87,16 @@ public class Frame extends JFrame implements IGameEvents {
                     return;
                 }
 
-                // 2. Si ya tenías una planta seleccionada, revisamos si hiciste clic en una celda válida
+                for (SunDrawing sd : new ArrayList<>(sunDrawings)) {
+                    if (sd.getBounds().contains(e.getPoint())) {
+                        sunCounter += 25;
+                        sunCounterLabel.setText(String.valueOf(sunCounter));
+                        removeSunUI(sd.getSun().getId());
+                        game.getFallingSuns().remove(sd.getSun());
+                        break;
+                    }
+                }
+
                 if (selectedPlant != null) {
                     Point cellCenter = getCellCenterIfValid(x, y);
                     if (cellCenter == null) {
@@ -94,7 +107,6 @@ public class Frame extends JFrame implements IGameEvents {
                     int px = cellCenter.x - Game.PEA_SHOOTER_WIDTH / 2;
                     int py = cellCenter.y - Game.PEA_SHOOTER_HEIGHT / 2;
 
-                    // ❌ Verificar si ya hay una planta en esta celda
                     for (Plant p : game.getPlants()) {
                         if (Math.abs(p.getX() - px) < cellWidth / 2 && Math.abs(p.getY() - py) < cellHeight / 2) {
                             System.out.println("Ya hay una planta en esta celda.");
@@ -102,31 +114,39 @@ public class Frame extends JFrame implements IGameEvents {
                         }
                     }
 
-                    // ✅ Plantar la nueva planta
                     if (selectedPlant.equals("Peashooter")) {
-                        PeaShooter ps = new PeaShooter(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
-                        game.getPlants().add(ps);
-                        addPlantUI(ps);
+                        if (sunCounter >= COSTO_PEASHOOTER) {
+                            sunCounter -= COSTO_PEASHOOTER;
+                            sunCounterLabel.setText(String.valueOf(sunCounter));
+                            PeaShooter ps = new PeaShooter(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                            game.getPlants().add(ps);
+                            addPlantUI(ps);
+                        } else {
+                            System.out.println("No tienes suficientes soles para plantar un Peashooter.");
+                        }
                     } else if (selectedPlant.equals("Sunflower")) {
-                        SunFlower sf = new SunFlower(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
-                        game.getPlants().add(sf);
-                        addPlantUI(sf);
+                        if (sunCounter >= COSTO_SUNFLOWER) {
+                            sunCounter -= COSTO_SUNFLOWER;
+                            sunCounterLabel.setText(String.valueOf(sunCounter));
+                            SunFlower sf = new SunFlower(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                            game.getPlants().add(sf);
+                            addPlantUI(sf);
+                        } else {
+                            System.out.println("No tienes suficientes soles para plantar un Sunflower.");
+                        }
                     }
 
-                    selectedPlant = null; // limpiar selección
-                }
 
+                    selectedPlant = null;
+                }
             }
         });
 
         pack();
         setVisible(true);
-
-        // Iniciar lógica del juego
         game = new Game(this);
         startGameThreads();
-
-        background.repaint(); // aseguramos dibujado inicial
+        background.repaint();
     }
 
     private void startGameThreads() {
@@ -205,7 +225,7 @@ public class Frame extends JFrame implements IGameEvents {
         }
         if (plantDrawing != null) {
             plantDrawing.setBounds(p.getX(), p.getY(), p.getWidth(), p.getHeight());
-            layeredPane.add(plantDrawing, Integer.valueOf(1)); // capa sobre el fondo
+            layeredPane.add(plantDrawing, Integer.valueOf(1));
             plantDrawing.repaint();
         }
     }
@@ -214,7 +234,7 @@ public class Frame extends JFrame implements IGameEvents {
     public void throwAttackUI(GreenPea p) {
         GreenPeaDrawing pDrawing = new GreenPeaDrawing(p);
         pDrawing.setBounds(p.getX(), p.getY(), p.getWidth(), p.getHeight());
-        layeredPane.add(pDrawing, Integer.valueOf(2)); // por encima de plantas
+        layeredPane.add(pDrawing, Integer.valueOf(2));
         pDrawing.repaint();
     }
 
@@ -248,7 +268,7 @@ public class Frame extends JFrame implements IGameEvents {
         SunDrawing sd = new SunDrawing(sun);
         sd.setBounds(sun.getX(), sun.getY(), sun.getWidth(), sun.getHeight());
         sunDrawings.add(sd);
-        layeredPane.add(sd, Integer.valueOf(3)); // encima de todo
+        layeredPane.add(sd, Integer.valueOf(3));
         sd.repaint();
     }
 
@@ -272,11 +292,9 @@ public class Frame extends JFrame implements IGameEvents {
             return false;
         });
 
-        // 🔧 🔥 OBLIGATORIO para que desaparezca en pantalla
         layeredPane.revalidate();
         layeredPane.repaint();
     }
-
 
     public static void main(String[] args) {
         new Frame();
