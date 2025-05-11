@@ -12,10 +12,13 @@ public class Background extends JPanel {
     private BufferedImage bufferedImage;
     private Image peaShooterIcon;
     private Image sunflowerIcon;
+    private Image plantSelectorImage;
+
 
     // Zonas clicables de íconos
-    public Rectangle peaShooterSlot = new Rectangle(50, 10, 60, 80);
-    public Rectangle sunflowerSlot = new Rectangle(120, 10, 60, 80);
+    public Rectangle peaShooterSlot = new Rectangle(170, 10, 60, 80);     // más arriba y a la izquierda
+    public Rectangle sunflowerSlot = new Rectangle(100, 10, 60, 80);     // a la derecha del primero
+
 
     // Parámetros de la grilla (misma lógica que en Frame)
     private final int startX = 100;
@@ -44,6 +47,14 @@ public class Background extends JPanel {
             System.err.println("Error cargando íconos de plantas.");
             e.printStackTrace();
         }
+
+        try (InputStream input = getClass().getClassLoader().getResourceAsStream("selector_plant.png")) {
+            plantSelectorImage = ImageIO.read(input);
+        } catch (IOException e) {
+            System.err.println("Error cargando imagen del selector de plantas.");
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -57,6 +68,11 @@ public class Background extends JPanel {
             g2d.drawImage(bufferedImage, 0, 0, getWidth(), getHeight(),
                     165, 0, 990, 570, this);
         }
+
+        if (plantSelectorImage != null) {
+            g.drawImage(plantSelectorImage, 5, 0, 520, 100, this);// Aumenta el tamaño aquí
+        }
+
 
         // Selector de plantas
         if (peaShooterIcon != null) {

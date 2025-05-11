@@ -24,15 +24,20 @@ public class Sun {
         this.height = height;
     }
 
-    public void fall() {
-        y += 1; // velocidad de caída
-    }
-
     public boolean hasLanded() {
         return y >= stopY;
+    }
+
+    public long getLandedTime() {
+        return landedTime;
     }
 
     public boolean shouldDisappear() {
         return landedTime > 0 && System.currentTimeMillis() - landedTime > 6000;
     }
+
+    public void fall() {
+        y += 1; // o y += 2 si quieres que caiga más rápido
+    }
+
 }

@@ -119,9 +119,6 @@ public class Frame extends JFrame implements IGameEvents {
             }
         });
 
-
-
-
         pack();
         setVisible(true);
 
@@ -274,7 +271,12 @@ public class Frame extends JFrame implements IGameEvents {
             }
             return false;
         });
+
+        // 🔧 🔥 OBLIGATORIO para que desaparezca en pantalla
+        layeredPane.revalidate();
+        layeredPane.repaint();
     }
+
 
     public static void main(String[] args) {
         new Frame();

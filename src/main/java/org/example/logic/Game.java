@@ -35,6 +35,7 @@ public class Game {
     private List<Plant> plants;
     @Getter
     private List<Attack> attacks;
+    private List<Sun> fallingSuns = new java.util.concurrent.CopyOnWriteArrayList<>();
 
     private IGameEvents iGameEvents;
 
@@ -134,37 +135,43 @@ public class Game {
         return gp;
     }
 
-    private List<Sun> fallingSuns = new ArrayList<>();
+
     public List<Sun> getFallingSuns() {
         return fallingSuns;
     }
 
     public void generateFallingSun() {
         int x = 100 + (int) (Math.random() * 800);
-        Sun sun = new Sun(x, 0, 60, 60);  // Tamaño más grande
+        Sun sun = new Sun(x, 0, 60, 60);
+        sun.setStopY(600); // <= FUNDAMENTAL PARA QUE TOQUE EL SUELO
         fallingSuns.add(sun);
         iGameEvents.addSunUI(sun);
     }
 
-
     public void reviewFallingSuns() {
-        Iterator<Sun> iterator = fallingSuns.iterator();
+        List<Sun> sunsToRemove = new ArrayList<>();
 
-        while (iterator.hasNext()) {
-            Sun sun = iterator.next();
-
-            if (sun.hasLanded()) {
-                if (sun.getLandedTime() == -1) {
-                    sun.setLandedTime(System.currentTimeMillis());
-                } else if (sun.shouldDisappear()) {
-                    iGameEvents.removeSunUI(sun.getId());
-                    iterator.remove(); // ✅ eliminación segura
-                }
-            } else {
+        for (Sun sun : fallingSuns) {
+            if (!sun.hasLanded()) {
                 sun.fall();
                 iGameEvents.updateSunPosition(sun.getId());
+            } else {
+                if (sun.getLandedTime() == -1) {
+                    sun.setLandedTime(System.currentTimeMillis());
+                } else {
+                    long tiempoActual = System.currentTimeMillis();
+                    long tiempoDesdeQueCayo = tiempoActual - sun.getLandedTime();
+                    if (tiempoDesdeQueCayo > 6000) {
+                        iGameEvents.removeSunUI(sun.getId());
+                        sunsToRemove.add(sun);
+                        System.out.println("☀️ Sol eliminado tras " + tiempoDesdeQueCayo + "ms");
+                    }
+                }
             }
         }
+
+        // 🔥 eliminar fuera del bucle
+        fallingSuns.removeAll(sunsToRemove);
     }
 
 
