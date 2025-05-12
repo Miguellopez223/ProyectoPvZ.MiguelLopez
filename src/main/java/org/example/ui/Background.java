@@ -14,11 +14,14 @@ public class Background extends JPanel {
     private Image sunflowerIcon;
     private Image plantSelectorImage;
     private Image shovelIcon;
+    private Image snowPeaIcon;
 
     // Zonas clicables de íconos
     public Rectangle peaShooterSlot = new Rectangle(170, 10, 60, 80);     // más arriba y a la izquierda
     public Rectangle sunflowerSlot = new Rectangle(100, 10, 60, 80);     // a la derecha del primero
     public Rectangle shovelSlot = new Rectangle(530, 0, 100, 100); // ajusta según tu diseño
+    public Rectangle snowPeaSlot = new Rectangle(240, 10, 60, 80); // a la derecha del sunflower
+
 
 
     // Parámetros de la grilla (misma lógica que en Frame)
@@ -59,6 +62,13 @@ public class Background extends JPanel {
             e.printStackTrace();
         }
 
+        try {
+            snowPeaIcon = ImageIO.read(getClass().getClassLoader().getResource("SnowPeaIcon.png"));
+        } catch (IOException e) {
+            System.err.println("Error cargando ícono de Snow Pea.");
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -88,6 +98,10 @@ public class Background extends JPanel {
         }
         if (shovelIcon != null) {
             g2d.drawImage(shovelIcon, shovelSlot.x, shovelSlot.y, shovelSlot.width, shovelSlot.height, this);
+        }
+        if (snowPeaIcon != null) {
+            g2d.drawImage(snowPeaIcon, snowPeaSlot.x, snowPeaSlot.y,
+                    snowPeaSlot.width, snowPeaSlot.height, this);
         }
 
         // Dibuja la grilla roja de plantado

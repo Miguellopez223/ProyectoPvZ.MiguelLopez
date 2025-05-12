@@ -6,6 +6,7 @@ import org.example.model.Sun;
 import org.example.model.attack.GreenPea;
 import org.example.model.plant.PeaShooter;
 import org.example.model.plant.Plant;
+import org.example.model.plant.SnowPeaShooter;
 import org.example.model.plant.SunFlower;
 import org.example.model.zombie.Zombie;
 
@@ -31,6 +32,7 @@ public class Frame extends JFrame implements IGameEvents {
 
     private static final int COSTO_SUNFLOWER = 50;
     private static final int COSTO_PEASHOOTER = 100;
+    private static final int COSTO_SNOWPEA = 150;
 
     private List<ZombieDrawing> zombieDrawings = new ArrayList<>();
     private boolean shovelSelected = false;
@@ -68,6 +70,11 @@ public class Frame extends JFrame implements IGameEvents {
                 int y = e.getY();
 
                 // Seleccionar planta
+                if (background.snowPeaSlot.contains(x, y)) {
+                    selectedPlant = "SnowPea";
+                    System.out.println("Seleccionaste SnowPea");
+                    return;
+                }
                 if (background.peaShooterSlot.contains(x, y)) {
                     selectedPlant = "Peashooter";
                     System.out.println("Seleccionaste Peashooter");
@@ -145,13 +152,22 @@ public class Frame extends JFrame implements IGameEvents {
                         game.getPlants().add(ps);
                         addPlantUI(ps);
                         game.getPlantsInBoard()[row][col] = true;
-                    } else if (selectedPlant.equals("Sunflower") && sunCounter >= COSTO_SUNFLOWER) {
+                    }
+                    else if (selectedPlant.equals("Sunflower") && sunCounter >= COSTO_SUNFLOWER) {
                         sunCounter -= COSTO_SUNFLOWER;
                         SunFlower sf = new SunFlower(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
                         game.getPlants().add(sf);
                         addPlantUI(sf);
                         game.getPlantsInBoard()[row][col] = true;
                     }
+                    else if (selectedPlant.equals("SnowPea") && sunCounter >= COSTO_SNOWPEA) {
+                        sunCounter -= COSTO_SNOWPEA;
+                        SnowPeaShooter snow = new SnowPeaShooter(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        game.getPlants().add(snow);
+                        addPlantUI(snow);
+                        game.getPlantsInBoard()[row][col] = true;
+                    }
+
 
                     sunCounterLabel.setText(String.valueOf(sunCounter));
                     selectedPlant = null;
@@ -207,7 +223,7 @@ public class Frame extends JFrame implements IGameEvents {
             while (true) {
                 game.generateFallingSun();
                 try {
-                    Thread.sleep(3000);
+                    Thread.sleep(1000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -275,11 +291,16 @@ public class Frame extends JFrame implements IGameEvents {
         } else if (p instanceof SunFlower sf) {
             plantDrawing = new SunFlowerDrawing(sf);
         }
+        else if (p instanceof SnowPeaShooter snow) {
+            plantDrawing = new SnowPeaShooterDrawing(snow);
+        }
+
         if (plantDrawing != null) {
             plantDrawing.setBounds(p.getX(), p.getY(), p.getWidth(), p.getHeight());
             layeredPane.add(plantDrawing, Integer.valueOf(1));
             plantDrawing.repaint();
         }
+
     }
 
     @Override
