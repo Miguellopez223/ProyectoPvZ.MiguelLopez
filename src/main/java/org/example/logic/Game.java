@@ -213,10 +213,11 @@ public class Game {
     }
 
     public void reviewZombies() {
-        List<Zombie> toRemove = new ArrayList<>();
         long now = System.currentTimeMillis();
+        Iterator<Zombie> zombieIterator = zombies.iterator();
 
-        for (Zombie z : zombies) {
+        while (zombieIterator.hasNext()) {
+            Zombie z = zombieIterator.next();
             boolean collided = false;
 
             Iterator<Plant> iterator = plants.iterator();
@@ -228,14 +229,14 @@ public class Game {
                 if (zombieRect.intersects(plantRect)) {
                     collided = true;
 
-                    if (now - z.getPrevAttackTime() >= 500) {
+                    if (now - z.getPrevAttackTime() >= 1000) {
                         z.setPrevAttackTime(now);
                         p.setDefense(p.getDefense() - 10);
                         System.out.println("🧟 Zombie atacó a planta, defensa restante: " + p.getDefense());
 
                         if (p.getDefense() <= 0) {
                             iGameEvents.deleteComponentUI(p.getId());
-                            iterator.remove(); // ✅ eliminar correctamente
+                            iterator.remove(); // ✅ eliminar planta correctamente
                             System.out.println("🌱 Planta destruida por zombie.");
 
                             int row = (p.getY() - posStartY + p.getHeight() / 2) / 120;
@@ -244,7 +245,7 @@ public class Game {
                         }
                     }
 
-                    break; // ya colisionó con una planta, no evalúa más
+                    break; // solo una planta a la vez
                 }
             }
 
@@ -255,13 +256,14 @@ public class Game {
                     iGameEvents.updateZombieUI(z.getId());
 
                     if (z.isOutOfScreen()) {
-                        toRemove.add(z);
                         iGameEvents.removeZombieUI(z.getId());
+                        zombieIterator.remove(); // ✅ eliminar zombie correctamente
                     }
                 }
+            } else if (z.getHealth() <= 0) {
+                iGameEvents.removeZombieUI(z.getId());
+                zombieIterator.remove(); // ✅ eliminar zombie muerto correctamente
             }
         }
-
-        zombies.removeAll(toRemove);
     }
 }
