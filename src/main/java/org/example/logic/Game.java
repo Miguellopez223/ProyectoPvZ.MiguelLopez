@@ -37,17 +37,27 @@ public class Game {
     public List<Zombie> getZombies() { return zombies; }
     private List<Zombie> attackingZombies = new ArrayList<>();
 
-
     private IGameEvents iGameEvents;
+
+    public boolean[][] getPlantsInBoard() {
+        return plantsInBoard;
+    }
+
 
     public Game(IGameEvents iGameEvents) {
         availablePlants = new ArrayList<>();
         plants = new ArrayList<>();
         attacks = new ArrayList<>();
+        fallingSuns = new CopyOnWriteArrayList<>();
+        zombies = new ArrayList<>();
+        attackingZombies = new ArrayList<>();
+
         posStartX = 100;
         posStartY = 100;
+        plantsInBoard = new boolean[5][9]; // 5 filas, 9 columnas
         this.iGameEvents = iGameEvents;
     }
+
 
     public void createDefaultPeaShooter(int nroPlanta) {
         int widthCuadrante = 100;
@@ -209,32 +219,36 @@ public class Game {
         for (Zombie z : zombies) {
             boolean collided = false;
 
-            for (Plant p : new ArrayList<>(plants)) {
+            Iterator<Plant> iterator = plants.iterator();
+            while (iterator.hasNext()) {
+                Plant p = iterator.next();
                 Rectangle zombieRect = new Rectangle(z.getX(), z.getY(), z.getWidth(), z.getHeight());
                 Rectangle plantRect = new Rectangle(p.getX(), p.getY(), p.getWidth(), p.getHeight());
 
                 if (zombieRect.intersects(plantRect)) {
                     collided = true;
 
-                    if (now - z.getPrevAttackTime() >= 500) {  // ⏱️ solo cada 0.5 seg
-                        z.setPrevAttackTime(now);  // ⏲️ actualizar tiempo
-
+                    if (now - z.getPrevAttackTime() >= 500) {
+                        z.setPrevAttackTime(now);
                         p.setDefense(p.getDefense() - 10);
                         System.out.println("🧟 Zombie atacó a planta, defensa restante: " + p.getDefense());
 
                         if (p.getDefense() <= 0) {
                             iGameEvents.deleteComponentUI(p.getId());
-                            plants.remove(p);
+                            iterator.remove(); // ✅ eliminar correctamente
                             System.out.println("🌱 Planta destruida por zombie.");
+
+                            int row = (p.getY() - posStartY + p.getHeight() / 2) / 120;
+                            int col = (p.getX() - posStartX + p.getWidth() / 2) / 100;
+                            plantsInBoard[row][col] = false;
                         }
                     }
 
-                    break;
+                    break; // ya colisionó con una planta, no evalúa más
                 }
             }
 
             if (!collided) {
-                // solo avanza si no está chocando con planta
                 if (now - z.getPrevMoveTime() > 220) {
                     z.moveLeft();
                     z.setPrevMoveTime(now);

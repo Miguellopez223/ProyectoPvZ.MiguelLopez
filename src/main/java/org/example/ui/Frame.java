@@ -109,11 +109,11 @@ public class Frame extends JFrame implements IGameEvents {
                     int px = cellCenter.x - Game.PEA_SHOOTER_WIDTH / 2;
                     int py = cellCenter.y - Game.PEA_SHOOTER_HEIGHT / 2;
 
-                    for (Plant p : game.getPlants()) {
-                        if (Math.abs(p.getX() - px) < cellWidth / 2 && Math.abs(p.getY() - py) < cellHeight / 2) {
-                            System.out.println("Ya hay una planta en esta celda.");
-                            return;
-                        }
+                    int row = (py - startY + Game.PEA_SHOOTER_HEIGHT / 2) / cellHeight;
+                    int col = (px - startX + Game.PEA_SHOOTER_WIDTH / 2) / cellWidth;
+                    if (game.getPlantsInBoard()[row][col]) {
+                        System.out.println("Ya hay una planta en esta celda.");
+                        return;
                     }
 
                     if (selectedPlant.equals("Peashooter")) {
@@ -123,6 +123,7 @@ public class Frame extends JFrame implements IGameEvents {
                             PeaShooter ps = new PeaShooter(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
                             game.getPlants().add(ps);
                             addPlantUI(ps);
+                            game.getPlantsInBoard()[row][col] = true;
                         } else {
                             System.out.println("No tienes suficientes soles para plantar un Peashooter.");
                         }
@@ -133,6 +134,7 @@ public class Frame extends JFrame implements IGameEvents {
                             SunFlower sf = new SunFlower(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
                             game.getPlants().add(sf);
                             addPlantUI(sf);
+                            game.getPlantsInBoard()[row][col] = true;
                         } else {
                             System.out.println("No tienes suficientes soles para plantar un Sunflower.");
                         }
@@ -275,14 +277,17 @@ public class Frame extends JFrame implements IGameEvents {
         Component c = getComponentById(id);
         if (c != null) {
             layeredPane.remove(c);
+            layeredPane.repaint(); // ✅ fuerza redibujado
         }
     }
 
     public Component getComponentById(String id) {
         for (Component comp : layeredPane.getComponents()) {
-            if (comp instanceof GreenPeaDrawing pd && pd.getId().equals(id)) {
-                return comp;
-            }
+            if (comp instanceof GreenPeaDrawing gp && gp.getId().equals(id)) return comp;
+            if (comp instanceof PeaShooterDrawing ps && ps.getId().equals(id)) return comp;
+            if (comp instanceof SunFlowerDrawing sf && sf.getId().equals(id)) return comp;
+            if (comp instanceof SunDrawing sun && sun.getSun().getId().equals(id)) return comp;
+            if (comp instanceof ZombieDrawing zd && zd.getZombie().getId().equals(id)) return comp;
         }
         return null;
     }
