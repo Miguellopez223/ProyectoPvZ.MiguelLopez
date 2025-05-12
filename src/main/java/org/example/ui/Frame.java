@@ -5,6 +5,7 @@ import org.example.logic.IGameEvents;
 import org.example.model.Sun;
 import org.example.model.attack.GreenPea;
 import org.example.model.plant.*;
+import org.example.model.zombie.BucketHeadZombie;
 import org.example.model.zombie.ConeHeadZombie;
 import org.example.model.zombie.Zombie;
 
@@ -374,6 +375,7 @@ public class Frame extends JFrame implements IGameEvents {
             if (comp instanceof SunDrawing sun && sun.getSun().getId().equals(id)) return comp;
             if (comp instanceof ZombieDrawing zd && zd.getZombie().getId().equals(id)) return comp;
             if (comp instanceof ConeHeadZombieDrawing chzd && chzd.getZombie().getId().equals(id)) return comp;
+            if (comp instanceof BucketHeadZombieDrawing bhzd && bhzd.getZombie().getId().equals(id)) return comp;
         }
         return null;
     }
@@ -417,8 +419,10 @@ public class Frame extends JFrame implements IGameEvents {
 
         if (z instanceof ConeHeadZombie chz) {
             zd = new ConeHeadZombieDrawing(chz);
+        } else if (z instanceof BucketHeadZombie bhz) {
+            zd = new BucketHeadZombieDrawing(bhz);
         } else {
-            zd = new ZombieDrawing(z); // Zombie normal
+            zd = new ZombieDrawing(z);
         }
 
         zd.setBounds(z.getX(), z.getY(), z.getWidth(), z.getHeight());
@@ -446,6 +450,10 @@ public class Frame extends JFrame implements IGameEvents {
                 chzd.updatePosition();
                 break;
             }
+            if (comp instanceof BucketHeadZombieDrawing bhzd && bhzd.getZombie().getId().equals(id)) {
+                bhzd.updatePosition();
+                break;
+            }
         }
     }
 
@@ -459,6 +467,10 @@ public class Frame extends JFrame implements IGameEvents {
             }
             if (comp instanceof ConeHeadZombieDrawing chzd && chzd.getZombie().getId().equals(id)) {
                 layeredPane.remove(chzd);
+                return true;
+            }
+            if (comp instanceof BucketHeadZombieDrawing bhzd && bhzd.getZombie().getId().equals(id)) {
+                layeredPane.remove(bhzd);
                 return true;
             }
             return false;
