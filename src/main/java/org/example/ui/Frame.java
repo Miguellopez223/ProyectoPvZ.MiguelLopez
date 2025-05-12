@@ -4,10 +4,7 @@ import org.example.logic.Game;
 import org.example.logic.IGameEvents;
 import org.example.model.Sun;
 import org.example.model.attack.GreenPea;
-import org.example.model.plant.PeaShooter;
-import org.example.model.plant.Plant;
-import org.example.model.plant.SnowPeaShooter;
-import org.example.model.plant.SunFlower;
+import org.example.model.plant.*;
 import org.example.model.zombie.Zombie;
 
 import javax.swing.*;
@@ -33,6 +30,8 @@ public class Frame extends JFrame implements IGameEvents {
     private static final int COSTO_SUNFLOWER = 50;
     private static final int COSTO_PEASHOOTER = 100;
     private static final int COSTO_SNOWPEA = 150;
+    private static final int COSTO_WALLNUT = 50;
+
 
     private List<ZombieDrawing> zombieDrawings = new ArrayList<>();
     private boolean shovelSelected = false;
@@ -41,6 +40,10 @@ public class Frame extends JFrame implements IGameEvents {
     private final int startY = 100;
     private final int cellWidth = 102;
     private final int cellHeight = 125;
+
+    private Image wallNutIcon;
+    public Rectangle wallNutSlot = new Rectangle(310, 10, 60, 80);
+
 
     public Frame() {
         setTitle("Plants vs Zombies");
@@ -70,6 +73,11 @@ public class Frame extends JFrame implements IGameEvents {
                 int y = e.getY();
 
                 // Seleccionar planta
+                if (background.wallNutSlot.contains(x, y)) {
+                    selectedPlant = "Wallnut";
+                    System.out.println("Seleccionaste Wallnut");
+                    return;
+                }
                 if (background.snowPeaSlot.contains(x, y)) {
                     selectedPlant = "SnowPea";
                     System.out.println("Seleccionaste SnowPea");
@@ -167,7 +175,13 @@ public class Frame extends JFrame implements IGameEvents {
                         addPlantUI(snow);
                         game.getPlantsInBoard()[row][col] = true;
                     }
-
+                    else if (selectedPlant.equals("Wallnut") && sunCounter >= COSTO_WALLNUT) {
+                        sunCounter -= COSTO_WALLNUT;
+                        WallNut wall = new WallNut(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        game.getPlants().add(wall);
+                        addPlantUI(wall);
+                        game.getPlantsInBoard()[row][col] = true;
+                    }
 
                     sunCounterLabel.setText(String.valueOf(sunCounter));
                     selectedPlant = null;
@@ -293,6 +307,9 @@ public class Frame extends JFrame implements IGameEvents {
         }
         else if (p instanceof SnowPeaShooter snow) {
             plantDrawing = new SnowPeaShooterDrawing(snow);
+        }
+        else if (p instanceof WallNut wallNut) {
+            plantDrawing = new WallNutDrawing(wallNut);
         }
 
         if (plantDrawing != null) {
