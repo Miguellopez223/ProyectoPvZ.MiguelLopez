@@ -26,6 +26,8 @@ public class PeaShooter extends Plant {
         this.width = width;
         this.height = height;
         this.prevTime = System.currentTimeMillis();
+        this.defenseInitial = 50;
+        this.defense = 50;
     }
 
     @Override

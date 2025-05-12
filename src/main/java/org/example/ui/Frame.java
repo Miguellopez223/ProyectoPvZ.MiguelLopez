@@ -7,6 +7,7 @@ import org.example.model.attack.GreenPea;
 import org.example.model.plant.PeaShooter;
 import org.example.model.plant.Plant;
 import org.example.model.plant.SunFlower;
+import org.example.model.zombie.Zombie;
 
 import javax.swing.*;
 import java.awt.*;
@@ -28,6 +29,7 @@ public class Frame extends JFrame implements IGameEvents {
     private int sunCounter = 0;
     private static final int COSTO_SUNFLOWER = 50;
     private static final int COSTO_PEASHOOTER = 100;
+    private List<ZombieDrawing> zombieDrawings = new ArrayList<>();
 
 
     // Tamaño de celdas del jardín
@@ -177,7 +179,7 @@ public class Frame extends JFrame implements IGameEvents {
             while (true) {
                 game.generateFallingSun();
                 try {
-                    Thread.sleep(10000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -208,6 +210,28 @@ public class Frame extends JFrame implements IGameEvents {
                 }
                 try {
                     Thread.sleep(2);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (true) {
+                game.spawnZombie();
+                try {
+                    Thread.sleep(8000); // cada 8 segundos
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
+
+        new Thread(() -> {
+            while (true) {
+                game.reviewZombies();
+                try {
+                    Thread.sleep(20);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -292,6 +316,38 @@ public class Frame extends JFrame implements IGameEvents {
             return false;
         });
 
+        layeredPane.revalidate();
+        layeredPane.repaint();
+    }
+
+    @Override
+    public void addZombieUI(Zombie z) {
+        ZombieDrawing zd = new ZombieDrawing(z);
+        zd.setBounds(z.getX(), z.getY(), z.getWidth(), z.getHeight());
+        zombieDrawings.add(zd);
+        layeredPane.add(zd, Integer.valueOf(2));
+        zd.repaint();
+    }
+
+    @Override
+    public void updateZombieUI(String id) {
+        for (ZombieDrawing zd : zombieDrawings) {
+            if (zd.getZombie().getId().equals(id)) {
+                zd.updatePosition();
+                break;
+            }
+        }
+    }
+
+    @Override
+    public void removeZombieUI(String id) {
+        zombieDrawings.removeIf(zd -> {
+            if (zd.getZombie().getId().equals(id)) {
+                layeredPane.remove(zd);
+                return true;
+            }
+            return false;
+        });
         layeredPane.revalidate();
         layeredPane.repaint();
     }
