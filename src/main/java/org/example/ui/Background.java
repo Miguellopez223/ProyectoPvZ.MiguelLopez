@@ -16,7 +16,7 @@ public class Background extends JPanel {
     private Image shovelIcon;
     private Image snowPeaIcon;
     private Image wallNutIcon;
-
+    private Image cherryIcon;
 
     // Zonas clicables de íconos
     public Rectangle peaShooterSlot = new Rectangle(170, 10, 60, 80);     // más arriba y a la izquierda
@@ -24,7 +24,7 @@ public class Background extends JPanel {
     public Rectangle shovelSlot = new Rectangle(530, 0, 100, 100); // ajusta según tu diseño
     public Rectangle snowPeaSlot = new Rectangle(240, 10, 60, 80); // a la derecha del sunflower
     public Rectangle wallNutSlot = new Rectangle(310, 10, 60, 80);
-
+    public Rectangle cherrySlot = new Rectangle(380, 10, 60, 80);
 
 
 
@@ -80,6 +80,12 @@ public class Background extends JPanel {
             e.printStackTrace();
         }
 
+        try {
+            cherryIcon = ImageIO.read(getClass().getClassLoader().getResource("CherryBombIcon.png"));
+        } catch (IOException e) {
+            System.err.println("Error cargando ícono de Cherry Bomb.");
+            e.printStackTrace();
+        }
 
     }
 
@@ -118,6 +124,10 @@ public class Background extends JPanel {
         if (wallNutIcon != null) {
             g2d.drawImage(wallNutIcon, wallNutSlot.x, wallNutSlot.y,
                     wallNutSlot.width, wallNutSlot.height, this);
+        }
+        if (cherryIcon != null) {
+            g2d.drawImage(cherryIcon, cherrySlot.x, cherrySlot.y,
+                    cherrySlot.width, cherrySlot.height, this);
         }
 
 

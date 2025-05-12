@@ -31,6 +31,7 @@ public class Frame extends JFrame implements IGameEvents {
     private static final int COSTO_PEASHOOTER = 100;
     private static final int COSTO_SNOWPEA = 150;
     private static final int COSTO_WALLNUT = 50;
+    private static final int COSTO_CHERRY = 125;
 
 
     private List<ZombieDrawing> zombieDrawings = new ArrayList<>();
@@ -76,6 +77,11 @@ public class Frame extends JFrame implements IGameEvents {
                 if (background.wallNutSlot.contains(x, y)) {
                     selectedPlant = "Wallnut";
                     System.out.println("Seleccionaste Wallnut");
+                    return;
+                }
+                if (background.cherrySlot.contains(x, y)) {
+                    selectedPlant = "Cherry";
+                    System.out.println("Seleccionaste Cherry Bomb");
                     return;
                 }
                 if (background.snowPeaSlot.contains(x, y)) {
@@ -180,6 +186,13 @@ public class Frame extends JFrame implements IGameEvents {
                         WallNut wall = new WallNut(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
                         game.getPlants().add(wall);
                         addPlantUI(wall);
+                        game.getPlantsInBoard()[row][col] = true;
+                    }
+                    else if (selectedPlant.equals("Cherry") && sunCounter >= COSTO_CHERRY) {
+                        sunCounter -= COSTO_CHERRY;
+                        CherryBomb cherry = new CherryBomb(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        game.getPlants().add(cherry);
+                        addPlantUI(cherry);
                         game.getPlantsInBoard()[row][col] = true;
                     }
 
@@ -310,6 +323,9 @@ public class Frame extends JFrame implements IGameEvents {
         }
         else if (p instanceof WallNut wallNut) {
             plantDrawing = new WallNutDrawing(wallNut);
+        }
+        else if (p instanceof CherryBomb cherry) {
+            plantDrawing = new CherryBombDrawing(cherry);
         }
 
         if (plantDrawing != null) {
