@@ -366,6 +366,9 @@ public class Frame extends JFrame implements IGameEvents {
             if (comp instanceof GreenPeaDrawing gp && gp.getId().equals(id)) return comp;
             if (comp instanceof PeaShooterDrawing ps && ps.getId().equals(id)) return comp;
             if (comp instanceof SunFlowerDrawing sf && sf.getId().equals(id)) return comp;
+            if (comp instanceof SnowPeaShooterDrawing snow && snow.getId().equals(id)) return comp;
+            if (comp instanceof WallNutDrawing wall && wall.getId().equals(id)) return comp;
+            if (comp instanceof CherryBombDrawing ch && ch.getId().equals(id)) return comp; // ✅ <-- esta línea
             if (comp instanceof SunDrawing sun && sun.getSun().getId().equals(id)) return comp;
             if (comp instanceof ZombieDrawing zd && zd.getZombie().getId().equals(id)) return comp;
         }

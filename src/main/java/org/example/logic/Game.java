@@ -4,6 +4,7 @@ import lombok.Getter;
 import org.example.model.Sun;
 import org.example.model.attack.Attack;
 import org.example.model.attack.GreenPea;
+import org.example.model.plant.CherryBomb;
 import org.example.model.plant.PeaShooter;
 import org.example.model.plant.Plant;
 import org.example.model.plant.SunFlower;
@@ -38,6 +39,9 @@ public class Game {
     private List<Zombie> attackingZombies = new ArrayList<>();
 
     private IGameEvents iGameEvents;
+    private final int cellWidth = 102;
+    private final int cellHeight = 125;
+
 
     public boolean[][] getPlantsInBoard() {
         return plantsInBoard;
@@ -114,6 +118,44 @@ public class Game {
                     iGameEvents.addSunUI(sun);
                 }
             }
+            else if (plant instanceof CherryBomb cherry) {
+                long now = System.currentTimeMillis();
+                if (now - cherry.getPrevTime() > 1000) {
+                    int centerX = cherry.getX() + cherry.getWidth() / 2;
+                    int centerY = cherry.getY() + cherry.getHeight() / 2;
+
+                    int explosionRadius = 130;
+
+                    List<Zombie> zombiesToDamage = new ArrayList<>();
+                    for (Zombie z : zombies) {
+                        int zx = z.getX() + z.getWidth() / 2;
+                        int zy = z.getY() + z.getHeight() / 2;
+                        double distancia = Math.hypot(centerX - zx, centerY - zy);
+                        if (distancia <= explosionRadius) {
+                            zombiesToDamage.add(z);
+                        }
+                    }
+
+                    for (Zombie z : zombiesToDamage) {
+                        z.takeDamage(300);
+                        if (z.getHealth() <= 0) {
+                            iGameEvents.removeZombieUI(z.getId());
+                            zombies.remove(z);
+                            System.out.println("💥 Zombie eliminado por Cherry Bomb");
+                        }
+                    }
+
+                    iGameEvents.deleteComponentUI(plant.getId());
+                    int row = (plant.getY() - posStartY + plant.getHeight() / 2) / cellHeight;
+                    int col = (plant.getX() - posStartX + plant.getWidth() / 2) / cellWidth;
+                    plantsInBoard[row][col] = false;
+                    plants.remove(plant);
+                    System.out.println("🍒 Cherry Bomb explotó y fue eliminada");
+                    break; // ¡Importante! para evitar errores por modificar lista en loop
+                }
+            }
+
+
         }
     }
 

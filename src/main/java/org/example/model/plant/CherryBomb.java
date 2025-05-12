@@ -8,6 +8,7 @@ import java.util.UUID;
 @Getter
 @Setter
 public class CherryBomb extends Plant {
+    private long prevTime;
     public CherryBomb(int x, int y, int width, int height) {
         this.id = UUID.randomUUID().toString();
         this.x = x;
@@ -16,6 +17,7 @@ public class CherryBomb extends Plant {
         this.height = height;
         this.defenseInitial = 100;
         this.defense = 100;
+        this.prevTime = System.currentTimeMillis(); // <- importante
     }
 
     @Override
