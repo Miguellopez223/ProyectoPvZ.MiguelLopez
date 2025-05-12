@@ -34,7 +34,7 @@ public class Frame extends JFrame implements IGameEvents {
     private static final int COSTO_SNOWPEA = 150;
     private static final int COSTO_WALLNUT = 50;
     private static final int COSTO_CHERRY = 125;
-
+    private static final int COSTO_HIPNOSETA = 75;
 
     private List<JComponent> zombieDrawings = new ArrayList<>();
 
@@ -77,6 +77,11 @@ public class Frame extends JFrame implements IGameEvents {
                 int y = e.getY();
 
                 // Seleccionar planta
+                if (background.hipnosetaSlot.contains(x, y)) {
+                    selectedPlant = "Hipnoseta";
+                    System.out.println("Seleccionaste Hipnoseta");
+                    return;
+                }
                 if (background.wallNutSlot.contains(x, y)) {
                     selectedPlant = "Wallnut";
                     System.out.println("Seleccionaste Wallnut");
@@ -198,6 +203,13 @@ public class Frame extends JFrame implements IGameEvents {
                         addPlantUI(cherry);
                         game.getPlantsInBoard()[row][col] = true;
                     }
+                    else if (selectedPlant.equals("Hipnoseta") && sunCounter >= COSTO_HIPNOSETA) {
+                        sunCounter -= COSTO_HIPNOSETA;
+                        Hipnoseta hipno = new Hipnoseta(px, py, Game.PEA_SHOOTER_WIDTH, Game.PEA_SHOOTER_HEIGHT);
+                        game.getPlants().add(hipno);
+                        addPlantUI(hipno);
+                        game.getPlantsInBoard()[row][col] = true;
+                    }
 
                     sunCounterLabel.setText(String.valueOf(sunCounter));
                     selectedPlant = null;
@@ -253,7 +265,7 @@ public class Frame extends JFrame implements IGameEvents {
             while (true) {
                 game.generateFallingSun();
                 try {
-                    Thread.sleep(1000);
+                    Thread.sleep(3000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
@@ -330,6 +342,9 @@ public class Frame extends JFrame implements IGameEvents {
         else if (p instanceof CherryBomb cherry) {
             plantDrawing = new CherryBombDrawing(cherry);
         }
+        else if (p instanceof Hipnoseta hipno) {
+            plantDrawing = new HipnosetaDrawing(hipno);
+        }
 
         if (plantDrawing != null) {
             plantDrawing.setBounds(p.getX(), p.getY(), p.getWidth(), p.getHeight());
@@ -376,6 +391,7 @@ public class Frame extends JFrame implements IGameEvents {
             if (comp instanceof ZombieDrawing zd && zd.getZombie().getId().equals(id)) return comp;
             if (comp instanceof ConeHeadZombieDrawing chzd && chzd.getZombie().getId().equals(id)) return comp;
             if (comp instanceof BucketHeadZombieDrawing bhzd && bhzd.getZombie().getId().equals(id)) return comp;
+            if (comp instanceof HipnosetaDrawing hip && hip.getId().equals(id)) return comp;
         }
         return null;
     }

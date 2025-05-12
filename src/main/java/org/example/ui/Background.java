@@ -17,6 +17,7 @@ public class Background extends JPanel {
     private Image snowPeaIcon;
     private Image wallNutIcon;
     private Image cherryIcon;
+    private Image hipnosetaIcon;
 
     // Zonas clicables de íconos
     public Rectangle peaShooterSlot = new Rectangle(170, 10, 60, 80);     // más arriba y a la izquierda
@@ -25,6 +26,7 @@ public class Background extends JPanel {
     public Rectangle snowPeaSlot = new Rectangle(240, 10, 60, 80); // a la derecha del sunflower
     public Rectangle wallNutSlot = new Rectangle(310, 10, 60, 80);
     public Rectangle cherrySlot = new Rectangle(380, 10, 60, 80);
+    public Rectangle hipnosetaSlot = new Rectangle(450, 10, 60, 80); // Ajusta coordenadas si hace falta
 
 
 
@@ -87,6 +89,14 @@ public class Background extends JPanel {
             e.printStackTrace();
         }
 
+        try {
+            hipnosetaIcon = ImageIO.read(getClass().getClassLoader().getResource("HipnosetaIcon.png"));
+        } catch (IOException e) {
+            System.err.println("Error cargando ícono de Hipnoseta.");
+            e.printStackTrace();
+        }
+
+
     }
 
     @Override
@@ -129,7 +139,10 @@ public class Background extends JPanel {
             g2d.drawImage(cherryIcon, cherrySlot.x, cherrySlot.y,
                     cherrySlot.width, cherrySlot.height, this);
         }
-
+        if (hipnosetaIcon != null) {
+            g2d.drawImage(hipnosetaIcon, hipnosetaSlot.x, hipnosetaSlot.y,
+                    hipnosetaSlot.width, hipnosetaSlot.height, this);
+        }
 
         // Dibuja la grilla roja de plantado
         g.setColor(Color.RED);

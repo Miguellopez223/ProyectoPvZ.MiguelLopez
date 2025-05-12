@@ -91,8 +91,9 @@ public class Game {
 
     public void reviewPlants() {
         long currentTime = System.currentTimeMillis();
+        List<Plant> plantsToRemove = new ArrayList<>();
 
-        for (Plant plant : plants) {
+        for (Plant plant : new ArrayList<>(plants)) {
             if (plant instanceof PeaShooter ps) {
                 int filaPlanta = (ps.getY() - posStartY + ps.getHeight() / 2) / 120;
 
@@ -119,13 +120,11 @@ public class Game {
                     fallingSuns.add(sun);
                     iGameEvents.addSunUI(sun);
                 }
-            }
-            else if (plant instanceof CherryBomb cherry) {
-                long now = System.currentTimeMillis();
-                if (now - cherry.getPrevTime() > 1000) {
+
+            } else if (plant instanceof CherryBomb cherry) {
+                if (currentTime - cherry.getPrevTime() > 1000) {
                     int centerX = cherry.getX() + cherry.getWidth() / 2;
                     int centerY = cherry.getY() + cherry.getHeight() / 2;
-
                     int explosionRadius = 130;
 
                     List<Zombie> zombiesToDamage = new ArrayList<>();
@@ -151,14 +150,15 @@ public class Game {
                     int row = (plant.getY() - posStartY + plant.getHeight() / 2) / cellHeight;
                     int col = (plant.getX() - posStartX + plant.getWidth() / 2) / cellWidth;
                     plantsInBoard[row][col] = false;
-                    plants.remove(plant);
+
+                    plantsToRemove.add(plant); // marcar para eliminar luego
                     System.out.println("🍒 Cherry Bomb explotó y fue eliminada");
-                    break; // ¡Importante! para evitar errores por modificar lista en loop
                 }
             }
-
-
         }
+
+        // 🔥 Eliminar plantas marcadas, fuera del bucle principal
+        plants.removeAll(plantsToRemove);
     }
 
     public void reviewAttacks() {
@@ -294,12 +294,12 @@ public class Game {
                     if (now - z.getPrevAttackTime() >= 1000) {
                         z.setPrevAttackTime(now);
                         p.setDefense(p.getDefense() - 10);
-                        System.out.println("🧟 Zombie atacó a planta, defensa restante: " + p.getDefense());
+                        System.out.println("Zombie atacó a planta, defensa restante: " + p.getDefense());
 
                         if (p.getDefense() <= 0) {
                             iGameEvents.deleteComponentUI(p.getId());
-                            iterator.remove(); // ✅ eliminar planta correctamente
-                            System.out.println("🌱 Planta destruida por zombie.");
+                            iterator.remove();
+                            System.out.println("Planta destruida por zombie.");
 
                             int row = (p.getY() - posStartY + p.getHeight() / 2) / 120;
                             int col = (p.getX() - posStartX + p.getWidth() / 2) / 100;
@@ -311,20 +311,22 @@ public class Game {
                 }
             }
 
-            if (!collided) {
-                if (now - z.getPrevMoveTime() > 220) {
-                    z.moveLeft();
-                    z.setPrevMoveTime(now);
-                    iGameEvents.updateZombieUI(z.getId());
+            if (!collided && now - z.getPrevMoveTime() > 120) {
+                z.moveLeft();
+                z.setPrevMoveTime(now);
+                iGameEvents.updateZombieUI(z.getId());
 
-                    if (z.isOutOfScreen()) {
-                        iGameEvents.removeZombieUI(z.getId());
-                        zombieIterator.remove(); // ✅ eliminar zombie correctamente
-                    }
+                if (z.isOutOfScreen()) {
+                    iGameEvents.removeZombieUI(z.getId());
+                    zombieIterator.remove();
+                    continue;
                 }
-            } else if (z.getHealth() <= 0) {
+            }
+
+            //  Verificar si el zombie está muerto (por disparo, cherry bomb, etc.)
+            if (z.getHealth() <= 0) {
                 iGameEvents.removeZombieUI(z.getId());
-                zombieIterator.remove(); // ✅ eliminar zombie muerto correctamente
+                zombieIterator.remove();
             }
         }
     }
