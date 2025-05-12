@@ -86,15 +86,22 @@ public class Game {
     public void reviewPlants() {
         long currentTime = System.currentTimeMillis();
 
-        for (int i = 0; i < plants.size(); i++) {
-            if (plants.get(i) instanceof PeaShooter ps) {
-                if (currentTime - ps.getPrevTime() > ps.getAttackTime()) {
+        for (Plant plant : plants) {
+            if (plant instanceof PeaShooter ps) {
+                int filaPlanta = (ps.getY() - posStartY + ps.getHeight() / 2) / 120;
+
+                boolean zombieEnFilaVisible = zombies.stream().anyMatch(z ->
+                        (z.getY() - posStartY + z.getHeight() / 2) / 120 == filaPlanta && z.getX() < 1000
+                );
+
+                if (zombieEnFilaVisible && currentTime - ps.getPrevTime() > ps.getAttackTime()) {
                     ps.setPrevTime(currentTime);
                     GreenPea p = newGreenPea(ps);
                     attacks.add(p);
                     iGameEvents.throwAttackUI(p);
                 }
-            } else if (plants.get(i) instanceof SunFlower sf) {
+
+            } else if (plant instanceof SunFlower sf) {
                 if (currentTime - sf.getPrevTime() > sf.getSunTime()) {
                     sf.setPrevTime(currentTime);
                     int centerX = sf.getX() + (sf.getWidth() / 2) - 30;
