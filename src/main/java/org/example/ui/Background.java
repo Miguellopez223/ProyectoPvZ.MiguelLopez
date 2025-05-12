@@ -13,11 +13,12 @@ public class Background extends JPanel {
     private Image peaShooterIcon;
     private Image sunflowerIcon;
     private Image plantSelectorImage;
-
+    private Image shovelIcon;
 
     // Zonas clicables de íconos
     public Rectangle peaShooterSlot = new Rectangle(170, 10, 60, 80);     // más arriba y a la izquierda
     public Rectangle sunflowerSlot = new Rectangle(100, 10, 60, 80);     // a la derecha del primero
+    public Rectangle shovelSlot = new Rectangle(530, 0, 100, 100); // ajusta según tu diseño
 
 
     // Parámetros de la grilla (misma lógica que en Frame)
@@ -27,10 +28,6 @@ public class Background extends JPanel {
     private final int cellHeight = 125;
     private final int cols = 9;
     private final int rows = 5;
-
-
-
-
 
     public Background() {
         try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream("pvz-jardin-full.png")) {
@@ -55,6 +52,13 @@ public class Background extends JPanel {
             e.printStackTrace();
         }
 
+        try {
+            shovelIcon = ImageIO.read(getClass().getClassLoader().getResource("shovel.png"));
+        } catch (IOException e) {
+            System.err.println("Error cargando imagen de la pala.");
+            e.printStackTrace();
+        }
+
     }
 
     @Override
@@ -73,7 +77,6 @@ public class Background extends JPanel {
             g.drawImage(plantSelectorImage, 5, 0, 520, 100, this);// Aumenta el tamaño aquí
         }
 
-
         // Selector de plantas
         if (peaShooterIcon != null) {
             g2d.drawImage(peaShooterIcon, peaShooterSlot.x, peaShooterSlot.y,
@@ -82,6 +85,9 @@ public class Background extends JPanel {
         if (sunflowerIcon != null) {
             g2d.drawImage(sunflowerIcon, sunflowerSlot.x, sunflowerSlot.y,
                     sunflowerSlot.width, sunflowerSlot.height, this);
+        }
+        if (shovelIcon != null) {
+            g2d.drawImage(shovelIcon, shovelSlot.x, shovelSlot.y, shovelSlot.width, shovelSlot.height, this);
         }
 
         // Dibuja la grilla roja de plantado
