@@ -8,6 +8,7 @@ import org.example.model.plant.CherryBomb;
 import org.example.model.plant.PeaShooter;
 import org.example.model.plant.Plant;
 import org.example.model.plant.SunFlower;
+import org.example.model.zombie.ConeHeadZombie;
 import org.example.model.zombie.Zombie;
 
 import java.awt.*;
@@ -256,7 +257,13 @@ public class Game {
     public void spawnZombie() {
         int fila = (int) (Math.random() * 5);
         int startY = posStartY + fila * 120;
-        Zombie z = new Zombie(1010 + (int)(Math.random() * 50), startY + 10, 60, 80);
+        Zombie z;
+        if (Math.random() < 0.5) {
+            z = new Zombie(1010 + (int)(Math.random() * 50), startY + 10, 60, 80);
+        } else {
+            z = new ConeHeadZombie(1010 + (int)(Math.random() * 50), startY + 10, 60, 80);
+        }
+
         zombies.add(z);
         iGameEvents.addZombieUI(z);
     }

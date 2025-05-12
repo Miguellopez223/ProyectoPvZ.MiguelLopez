@@ -5,6 +5,7 @@ import org.example.logic.IGameEvents;
 import org.example.model.Sun;
 import org.example.model.attack.GreenPea;
 import org.example.model.plant.*;
+import org.example.model.zombie.ConeHeadZombie;
 import org.example.model.zombie.Zombie;
 
 import javax.swing.*;
@@ -34,7 +35,8 @@ public class Frame extends JFrame implements IGameEvents {
     private static final int COSTO_CHERRY = 125;
 
 
-    private List<ZombieDrawing> zombieDrawings = new ArrayList<>();
+    private List<JComponent> zombieDrawings = new ArrayList<>();
+
     private boolean shovelSelected = false;
 
     private final int startX = 100;
@@ -371,6 +373,7 @@ public class Frame extends JFrame implements IGameEvents {
             if (comp instanceof CherryBombDrawing ch && ch.getId().equals(id)) return comp; // ✅ <-- esta línea
             if (comp instanceof SunDrawing sun && sun.getSun().getId().equals(id)) return comp;
             if (comp instanceof ZombieDrawing zd && zd.getZombie().getId().equals(id)) return comp;
+            if (comp instanceof ConeHeadZombieDrawing chzd && chzd.getZombie().getId().equals(id)) return comp;
         }
         return null;
     }
@@ -410,35 +413,61 @@ public class Frame extends JFrame implements IGameEvents {
 
     @Override
     public void addZombieUI(Zombie z) {
-        ZombieDrawing zd = new ZombieDrawing(z);
+        JComponent zd;
+
+        if (z instanceof ConeHeadZombie chz) {
+            zd = new ConeHeadZombieDrawing(chz);
+        } else {
+            zd = new ZombieDrawing(z); // Zombie normal
+        }
+
         zd.setBounds(z.getX(), z.getY(), z.getWidth(), z.getHeight());
-        zombieDrawings.add(zd);
+
+        // CAMBIÁ ESTA LÍNEA si tu lista está tipada como ZombieDrawing:
+        // zombieDrawings.add((ZombieDrawing) zd); ❌ provoca error
+
+        // CAMBIÁ el tipo de la lista a esto:
+        // private List<JComponent> zombieDrawings = new ArrayList<>();
+        zombieDrawings.add(zd); // ✅ sin casteo, ahora sí compila
+
         layeredPane.add(zd, Integer.valueOf(2));
         zd.repaint();
     }
 
+
     @Override
     public void updateZombieUI(String id) {
-        for (ZombieDrawing zd : zombieDrawings) {
-            if (zd.getZombie().getId().equals(id)) {
+        for (JComponent comp : zombieDrawings) {
+            if (comp instanceof ZombieDrawing zd && zd.getZombie().getId().equals(id)) {
                 zd.updatePosition();
+                break;
+            }
+            if (comp instanceof ConeHeadZombieDrawing chzd && chzd.getZombie().getId().equals(id)) {
+                chzd.updatePosition();
                 break;
             }
         }
     }
 
+
     @Override
     public void removeZombieUI(String id) {
-        zombieDrawings.removeIf(zd -> {
-            if (zd.getZombie().getId().equals(id)) {
+        zombieDrawings.removeIf(comp -> {
+            if (comp instanceof ZombieDrawing zd && zd.getZombie().getId().equals(id)) {
                 layeredPane.remove(zd);
+                return true;
+            }
+            if (comp instanceof ConeHeadZombieDrawing chzd && chzd.getZombie().getId().equals(id)) {
+                layeredPane.remove(chzd);
                 return true;
             }
             return false;
         });
+
         layeredPane.revalidate();
         layeredPane.repaint();
     }
+
 
     public static void main(String[] args) {
         new Frame();
